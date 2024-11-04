@@ -26,7 +26,7 @@ local function entry(_, args)
 			[[set line {2} && set begin ( test $line -lt 7  &&  echo (math "$line-1") || echo  6 ) && bat --highlight-line={2} --color=always --line-range (math "$line-$begin"):(math "$line+10") {1}]]
 	elseif shell_value == "nu" then
 		preview_cmd =
-			[[let line = ({2} | into int); let begin = if $line < 7 { $line - 1 } else { 6 }; bat --highlight-line={2} --color=always --line-range $'($line - $begin):($line + 10)' {1}]]
+			[[awk 'BEGIN {start={2}-15; if (start<1) start=1; end={2}+15; print \"bat --style=numbers --highlight-line={2} --color=always --line-range \" start \":\" end \" {1}\"}' | sh]]
 	end
 
 	if args[1] == "fzf" then
