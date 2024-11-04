@@ -25,7 +25,7 @@ local function entry(_, args)
 	elseif shell_value == "fish" then
 		preview_cmd = [[set line {2} && set begin ( test $line -lt 7  &&  echo (math "$line-1") || echo  6 ) && bat --highlight-line={2} --color=always --line-range (math "$line-$begin"):(math "$line+10") {1}]]
 	elseif shell_value == "nu" then
-		preview_cmd = [[let line = ({2} | into int); let begin = if $line < 7 { $line - 1 } else { 6 }; bat --highlight-line={2} --color=always --line-range $'($line - $begin):($line + 10)' {1}]]
+		preview_cmd = [[let line = ({2} | into int); let start = ([($line - 5), 1] | math max);bat --highlight-line=($line | into int) --color=always --line-range $"($start | into int):(($start | into int) + 10)" {1}]]
 	end
   	if ya.target_family() == "windows" and args[1] == "fzf" then
 		cmd_args = [[fzf --preview="bat --color=always {}"]]
