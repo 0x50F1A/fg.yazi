@@ -23,8 +23,7 @@ local function entry(_, args)
     if shell_value == "fish" then
         preview_cmd = [[set line {2} && set begin ( test $line -lt 7  &&  echo (math "$line-1") || echo  6 ) && bat --highlight-line={2} --color=always --line-range (math "$line-$begin"):(math "$line+10") {1}]]
     elseif shell_value == "nu" then
-        -- Modified preview command for Nushell to properly handle quotes and command structure
-        preview_cmd = [[let line = {2}; let start = ($line - 15 | math max 1); let end = ($line + 15); $"bat --style=numbers --highlight-line=($line) --color=always --line-range ($start):($end) {1}"]]
+        preview_cmd = [[let line = ({2} | into int); let start = ($line - 15 | math max 1); let end = ($line + 15); $"bat --style=numbers --highlight-line=($line) --color=always --line-range ($start):($end) {1}"]]
     else
         preview_cmd = [===[line={2} && begin=$( if [[ $line -lt 7 ]]; then echo $((line-1)); else echo 6; fi ) && bat --highlight-line={2} --color=always --line-range $((line-begin)):$((line+10)) {1}]===]
     end
@@ -32,7 +31,6 @@ local function entry(_, args)
     if args[1] == "fzf" then
         cmd_args = [[fzf --preview='bat --color=always {1}']]
     elseif args[1] == "rg" and shell_value == "nu" then
-        -- Simplified and fixed Nushell command
         cmd_args = [[rg --column --line-number --no-heading --color=always --smart-case "" | fzf --ansi --preview ']] 
             .. preview_cmd 
             .. [[' --delimiter : --preview-window 'up,60%' --nth '3..']]
@@ -59,7 +57,6 @@ local function entry(_, args)
                 --nth '3..'
         ]]
     elseif args[1] == "rga" and shell_value == "nu" then
-        -- Simplified and fixed Nushell rga command
         local rg_prefix = "rg --column --line-number --no-heading --color=always --smart-case"
         cmd_args = [[rga --files-with-matches --color ansi --smart-case --max-count=1 --no-messages --hidden --follow --no-ignore --glob '!.git' --glob '!.venv' --glob '!node_modules' --glob '!.history' --glob '!.Rproj.user' --glob '!.ipynb_checkpoints' "" | fzf --ansi --disabled --layout=reverse --sort --header-first --header '---- Search inside files ----' --preview ']]
             .. preview_cmd
@@ -95,7 +92,6 @@ local function entry(_, args)
                 --nth '3..'
         ]]
     else
-        -- Default command with fixed preview command
         cmd_args = [[rg --color=always --line-number --no-heading --smart-case '' | fzf --ansi --preview=']]
             .. preview_cmd
             .. [[' --delimiter=':' --preview-window='up:60%' --nth='3..']]
